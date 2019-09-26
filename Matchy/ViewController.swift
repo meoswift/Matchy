@@ -10,32 +10,49 @@ import UIKit
 
 class ViewController: UIViewController
 {
-    lazy var game = Matchy(numberOfCardPairs: (cardButtons.count + 1 / 2))
-    // in case there are odd number of cards
+    lazy var game = Matchy(numberOfCardPairs: numberOfCardPairs)
     
-    var flipCount = 0 {
-        didSet {
-            flipCountLabel.text = "Flips: \(flipCount)"
-        }
+    var numberOfCardPairs: Int {
+        return (cardButtons.count / 2);
+    }
+    
+    var theme = [
+        "animals"   : ["🐱","🐭","🐹","🐶","🐰","🐻","🐼","🦄","🐿","🐘"],
+        "christmas" : ["🎄","🎁","🎅🏻","❄️","🍗", "🤶🏻", "🍪", "🥂", "☃️"],
+        "tree"      : ["☘️","🌱","🌳","🌵","🍂","🌼","🌴","🎍","🌸"],
+        "food"      : ["🌯","🥙","🍣","🥓","🍟","🍔","🍕","🥘","🍱"],
+        "fruit"     : ["🍎","🍐","🍊","🍋","🍌","🍉","🍇","🥝","🍓"],
+        "pastry"    : ["🎂","🍮","🍪","🥐","🍞","🥨","🍡","🍥","🥠"],
+        "outfit"    : ["👘","👚","👖","👢","👞","🧤","👗","👒","🧣"],
+    ]
+    
+    @IBAction func newGameButton(_ sender: UIButton) {
+        flipCardsOnNewGame()
+        game = Matchy(numberOfCardPairs: numberOfCardPairs)
+        flipCountLabel.text = "Flips: \(game.flipCount)"
+        emoji = [:]
+        emojiChoices = chooseTheme
+    }
+    
+    var chooseTheme: [String] {
+        let randomTheme = Int(arc4random_uniform(UInt32(theme.count)))
+        let key = Array(theme.keys)[randomTheme]
+        return theme[key]!
     }
     
     @IBOutlet weak var flipCountLabel: UILabel!
-    
+
     @IBOutlet var cardButtons: [UIButton]!
     
     @IBAction func touchCard(_ sender: UIButton) {
-        flipCount += 1
         if let cardNumber = cardButtons.index(of: sender) {
-            game.chooseCard(at: cardNumber) //This function determines if a card is matched
+            game.chooseCard(at: cardNumber)
             updateViewFromModel()
-        } else {
-            print("can't find")
         }
     }
     
-    // Fuction to update View after deciding which card is faced up and which is faced down
-    // Also updates after checking if cards matched.
     func updateViewFromModel() {
+        flipCountLabel.text = "Flips: \(game.flipCount)"
         for index in cardButtons.indices {
             let button = cardButtons[index]
             let card = game.cards[index]
@@ -44,17 +61,24 @@ class ViewController: UIViewController
                 button.backgroundColor = #colorLiteral(red: 1, green: 0.9655000567, blue: 0.8827727437, alpha: 1)
             } else {
                 button.setTitle("", for: UIControlState.normal)
-                button.backgroundColor = card.isMatched ? #colorLiteral(red: 0, green: 0.6206576228, blue: 0.2871945202, alpha: 0) : #colorLiteral(red: 0.5039266348, green: 0.8744559288, blue: 0.7127764821, alpha: 1) // this means of a card is matched then the color turns clear -> disappear
+                button.backgroundColor = card.isMatched ? #colorLiteral(red: 0, green: 0.6206576228, blue: 0.2871945202, alpha: 0) : #colorLiteral(red: 0, green: 0.5690457821, blue: 0.5746168494, alpha: 1)
+                // this means of a card is matched then the color turns clear -> disappear
+                }
             }
         }
+    
+    func flipCardsOnNewGame() {
+        for index in cardButtons.indices {
+            let button = cardButtons[index]
+            button.setTitle("", for: UIControlState.normal)
+            button.backgroundColor = #colorLiteral(red: 0, green: 0.5690457821, blue: 0.5746168494, alpha: 1)
+        }
     }
-    
-    var emojiChoices = ["🎄","🎁","🎅🏻","❄️","🎉","🍗"]
-    
-    //Declare a emoji dictionary (but empty)
+        
+    lazy var emojiChoices = chooseTheme
+        
     var emoji = [Int:String]()
-    
-    //Function to populate the emoji dictionary. remove is used so that the emoji doesn't have repeated value.
+        
     func emoji(for card: Card) -> String {
         if emoji[card.idetifier] == nil, emojiChoices.count > 0 {
             let randomIndex = Int(arc4random_uniform(UInt32(emojiChoices.count)))
@@ -62,6 +86,6 @@ class ViewController: UIViewController
         }
         return emoji[card.idetifier] ?? "?" // this means if there is no emoji at card.identifier then return "?"
     }
-    
-}
 
+
+}

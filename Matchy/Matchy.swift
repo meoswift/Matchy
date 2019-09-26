@@ -11,32 +11,55 @@ import Foundation
 class Matchy
 {
     var cards = [Card]()
+    var flipCount = 0
     
-    // This var keeps track of whether there is one card faced up
-    // Optional Int because there might or might not be a card faced up
-    var indexOfOneAndOnlyFaceUpCard: Int?
+    var indexOfOneAndOnlyFaceUpCard: Int? {
+        get {
+            var foundIndex: Int?
+            for index in cards.indices {
+                if cards[index].isFaceUp {
+                    if foundIndex == nil {
+                        foundIndex = index
+                    } else {
+                        return nil
+                    }
+                }
+            }
+            return foundIndex
+        }
+        set {
+            for index in cards.indices {
+                if index == newValue {
+                    cards[index].isFaceUp = true
+                } else {
+                    cards[index].isFaceUp = false
+                }
+            }
+        }
+    }
     
     func chooseCard(at index:Int) {
+        flipCount += 1
         if !cards[index].isMatched  {
-            // matchIndex is of type Int. If there is no faced up then matchIndex cannot be indexOf... because indexOf... is nil.
-            if let matchIndex = indexOfOneAndOnlyFaceUpCard, matchIndex != index {
-                // check if cards match   
-                if cards[matchIndex].idetifier == cards[index].idetifier {
-                    cards[matchIndex].isMatched = true
+            let matchIndex = indexOfOneAndOnlyFaceUpCard
+            if matchIndex != nil, matchIndex != index {
+                if cards[matchIndex!].idetifier == cards[index].idetifier {
+                    cards[matchIndex!].isMatched = true
                     cards[index].isMatched = true
                 }
                 cards[index].isFaceUp = true
-                indexOfOneAndOnlyFaceUpCard = nil
-                //set back to nil because we flipped matched cards down
             } else {
-                // either no cards or 2 cards are matching
-                for flipDownIndex in cards.indices {
-                    //everything is down
-                    cards[flipDownIndex].isFaceUp = false
-                }
-                cards[index].isFaceUp = true
                 indexOfOneAndOnlyFaceUpCard = index
             }
+        }
+    }
+    
+    func randomizeCard() {
+        for index in cards.indices {
+            let randomIndex = Int(arc4random_uniform(UInt32(cards.count)))
+            let tempCard = cards[randomIndex]
+            cards[randomIndex] = cards[index]
+            cards[index] = tempCard
         }
     }
     
@@ -46,7 +69,7 @@ class Matchy
             let card = Card()
             cards += [card, card]
         }
-        
-        //TODO: Shuffle the cards
+        randomizeCard()
     }
+
 }
