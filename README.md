@@ -1,5 +1,4 @@
 # matchy-ios
 iOS game for card matching
 
-![alt text](screenshots/matchy-2.png) 
-![alt text](screenshots/mactchy-3.png)
+<img src="https://i.imgur.com/IbNvdsf.png" width="300"> <img src="https://i.imgur.com/JXxmMZM.png" width="300">
